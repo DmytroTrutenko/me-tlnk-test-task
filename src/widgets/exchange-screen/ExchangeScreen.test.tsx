@@ -62,9 +62,9 @@ describe('ExchangeScreen', () => {
     const { rerender } = render(<ExchangeScreen {...baseProps} resultState="loading" />)
     expect(screen.getByTestId('updated-at').textContent).toBe('Updating…')
     rerender(<ExchangeScreen {...baseProps} resultState="ready" ageLabel="3 min ago" />)
-    expect(screen.getByTestId('updated-at').textContent).toBe('3 min ago')
+    expect(screen.getByTestId('updated-at').textContent).toBe('Last updated 3 min ago')
     rerender(<ExchangeScreen {...baseProps} resultState="error" ageLabel="—" />)
-    expect(screen.getByTestId('updated-at').textContent).toBe('—')
+    expect(screen.getByTestId('updated-at').textContent).toBe('Last updated —')
   })
 
   it('keeps the current from/to as an option even when not in the currencies list', () => {

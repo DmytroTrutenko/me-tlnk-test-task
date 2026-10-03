@@ -562,7 +562,7 @@ describe('ConverterPage integration', () => {
       await flushMicrotasks()
 
       const updated = screen.getByTestId('updated-at')
-      expect(updated.textContent).toBe('—')
+      expect(updated.textContent).toBe('Last updated —')
 
       // refresh: a new quote is requested → "Updating…"
       await user.click(screen.getByTestId('refresh'))
@@ -584,16 +584,16 @@ describe('ConverterPage integration', () => {
       await flushMicrotasks()
 
       await waitFor(() => {
-        expect(updated.textContent).toBe('just now')
+        expect(updated.textContent).toBe('Last updated just now')
       })
 
       vi.setSystemTime(new Date(t0.getTime() + 60_000))
       await vi.advanceTimersByTimeAsync(15_000)
-      expect(updated.textContent).toBe('1 min ago')
+      expect(updated.textContent).toBe('Last updated 1 min ago')
 
       vi.setSystemTime(new Date(t0.getTime() + 6 * 60_000))
       await vi.advanceTimersByTimeAsync(15_000)
-      expect(updated.textContent).toBe('6 min ago')
+      expect(updated.textContent).toBe('Last updated 6 min ago')
     })
   })
 
