@@ -40,3 +40,11 @@ Lightweight Feature-Sliced Design under `src/`: `app / pages / widgets / entitie
 - Small, focused changes. Do not refactor unrelated code or add libraries that were not asked for.
 - Tests use explicit imports from 'vitest' (no globals) and controlled promises instead of setTimeout for async mocks.
 - At the end, list changed files and anything you were unsure about.
+
+## API facts (verified by probing)
+
+- `POST /api/quote` requires `Content-Type: application/json` (otherwise 500), `amount` as a JSON number (a string gives 400), and uppercase currency codes.
+- `rate` is a string; `amount` in the response is a JSON number echo, never use it for math.
+- The API is flaky: latency typically 1-2 s (up to ~2.2 s) and about 10% random 500 on valid requests, including `amount: 0` and `from === to`. 429 appears only on bursts of back-to-back requests. Errors must be visible to the user and retried manually; no automatic retries.
+- 15-digit amounts are accepted; the app limits input to 15 digits.
+- Shell is Windows PowerShell: no grep/head/sed. Use Select-String, Get-Content, Get-ChildItem. Use `curl.exe`, not the `curl` alias.
