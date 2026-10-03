@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import ConverterPage from '@/pages/converter'
-import { initialHistory, type HistoryRecord } from '@/entities/history-record'
+import { createHistoryRecord, initialHistory, type HistoryRecord } from '@/entities/history-record'
 import { convert, formatMoney, parseAmount } from '@/shared/lib/money'
 import { DIGIT_KEYS, isDigitKey, type KeyId, type TabId } from '@/shared/lib/constants'
 
@@ -61,7 +61,7 @@ export default function App() {
       })
       .then((data: Quote) => {
         setQuote(data)
-        setResult(formatMoney(convert(data.amount, data.rate)))
+        setResult(formatMoney(convert(amount, data.rate)))
         setLoading(false)
       })
       .catch((err) => console.error(err))
@@ -93,7 +93,7 @@ export default function App() {
         if (tab === 'exchange') {
           setHistory((prev) => [
             ...prev,
-            { from, to, amount: formatMoney(parseAmount(amount)), result },
+            createHistoryRecord({ from, to, amount, result: parseAmount(result).toString() }),
           ])
         }
         return

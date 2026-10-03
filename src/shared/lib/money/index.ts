@@ -1,1 +1,1 @@
-export { convert, formatMoney, parseAmount } from './money'
+export { convert, formatMoney, isZero, parseAmount } from './money'
