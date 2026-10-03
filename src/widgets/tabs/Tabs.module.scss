@@ -1,0 +1,30 @@
+.tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 22px 0 18px;
+  font-size: 15px;
+}
+
+.tab {
+  border: 0;
+  background: transparent;
+  padding: 6px 4px;
+  color: var(--color-text);
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 120ms ease;
+
+  &[aria-selected='true'] {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+  }
+}
+
+.divider {
+  width: 1px;
+  height: 18px;
+  background: var(--color-border);
+}
