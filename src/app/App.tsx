@@ -53,7 +53,7 @@ export default function App() {
     fetch('/api/quote', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to, amount: parseAmount(amount) }),
+      body: JSON.stringify({ from, to, amount: parseAmount(amount).toNumber() }),
     })
       .then((res) => {
         if (!res.ok) throw new Error(`Quote request failed: ${res.status}`)
