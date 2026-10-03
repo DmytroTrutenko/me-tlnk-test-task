@@ -21,7 +21,7 @@ data races, then correctness, then lower-impact items.
 ## 1. "The result shows an amount for the wrong currency" [user-flag] [verified]
 
 **Symptom.** Typing into the amount box, or switching `from`/`to`, can
-show a result computed for a *different* `(from, to, amount)` triple.
+show a result computed for a _different_ `(from, to, amount)` triple.
 Visible when the user types several digits quickly, or changes currency
 while a previous request is still in flight. The API responds in any
 order with up to ~3 s latency (see "API behaviour" — P50 ≈ 1.4 s, P90
@@ -37,6 +37,7 @@ clobber the fresher value. Combined with item 2 below (stale closure in
 the keypad handler), this is the direct cause of the user complaint.
 
 **Proposed fix.** Either
+
 - create an `AbortController` per effect, store it in a ref, abort the
   previous one in the effect's cleanup, and only apply the result if
   `!controller.signal.aborted`; or
@@ -49,7 +50,7 @@ the keypad handler), this is the direct cause of the user complaint.
 ## 2. "When I pick an old conversion from History, the amount is wrong" [user-flag] [verified]
 
 **Symptom.** Pressing OK on a history record sets `setAmount(record.amount)`,
-which is the *formatted* string with thousands separators (e.g. `'1,000'`,
+which is the _formatted_ string with thousands separators (e.g. `'1,000'`,
 `'12,500'`). The next quote request sends that string to the parser,
 which returns `1` instead of `1000` (the decimal portion after the comma
 is dropped by `parseFloat`). Even if the request did succeed, the user
@@ -63,14 +64,14 @@ Three independent causes feed into this complaint:
 - **(b) Initial history stores formatted strings.** `src/history.ts:8-16`
   stores `amount: '1,000'` and `result: '922.25'`. The `keypad` save
   path in `src/App.tsx:132` also stores the formatted value: `amount:
-  formatMoney(parseAmount(amount))`.
+formatMoney(parseAmount(amount))`.
 - **(c) The keypad handler closes over stale values.** The click handler
   in `src/App.tsx:90-158` has `[tab]` as its only dependency, so it
   reads `from`, `to`, `amount`, `result`, `history`, `selected` from
   whatever they were at the last effect run. After typing several digits
-  in the exchange tab, the buffer is the current state, but the *handler*
+  in the exchange tab, the buffer is the current state, but the _handler_
   is the old one. When the user later switches to History, presses OK
-  on row N, the OK branch reads the *old* `from`/`to`/`amount` while
+  on row N, the OK branch reads the _old_ `from`/`to`/`amount` while
   `setHistory` and `setSelected` are fresh — so the record loads with
   the wrong values. (See item 3 below for the listener-leak version of
   this trap.)
@@ -79,7 +80,7 @@ Three independent causes feed into this complaint:
 
 **Proposed fix.** Store raw user-typed strings (no commas) in
 `HistoryRecord`. On save, store the typed buffer as typed. On render,
-format the *display* via `formatMoney`; on input, never format the
+format the _display_ via `formatMoney`; on input, never format the
 buffer. On OK, set `amount` to the raw record. Replace `parseAmount`
 with a comma-stripping parse and (preferably) move money math to
 `decimal.js` (see item 8). The closure trap in (c) is fixed by
@@ -94,10 +95,11 @@ missing dependencies to the effect.
 `<table>` element. In StrictMode (dev), the effect runs twice on mount
 so the table already has two listeners. After N tab switches, every
 keypad click fires N+1 handlers. Side effects:
-- A single tap of "5" types "5" *and* "55" in dev.
+
+- A single tap of "5" types "5" _and_ "55" in dev.
 - A single tap of "m" saves two records on the History tab too.
 - Old listeners keep their own `tab` value, so after switching
-  exchange → history, then back, the *old* listener's `case 'C'`
+  exchange → history, then back, the _old_ listener's `case 'C'`
   still runs the exchange branch: pressing `C` on the History tab will
   also reset `amount` to `'0'`.
 - A click on a `<td>` (the empty space around a disabled button) still
@@ -130,7 +132,7 @@ clicks are per-button.
 ## 4. Stale closures in the keypad effect [code-only]
 
 **Symptom.** After changing `from`/`to` and then pressing `m`, the new
-history record carries the *previous* `(from, to)`, or the `OK` handler
+history record carries the _previous_ `(from, to)`, or the `OK` handler
 reads the wrong `selected` index, or `C` resets the wrong buffer. Most
 visible on rapid back-to-back keypad presses after a tab switch.
 
@@ -165,6 +167,7 @@ on a prop change because the state reference is already set. The
 `record` prop is even unused in the body except to build that label.
 
 **Proposed fix.** Don't store derived data in state:
+
 ```ts
 function HistoryRow({ record, selected }: ...) {
   return <li ...>{formatRecord(record)}</li>
@@ -211,7 +214,7 @@ terminal state clears the spinner. Surface the error to the user
 (`setError(msg)`) instead of `console.error`-only.
 
 A related edge case worth knowing: the initial `amount` state is `'0'`,
-which sends a quote for `amount: 0`. The probe shows this is *usually*
+which sends a quote for `amount: 0`. The probe shows this is _usually_
 200 (13/15), but the first probe hit a 500 on it. If the initial quote
 fails, `loading` stays true forever (item 7) and the rest of the app
 is unusable until the user types another digit.
@@ -250,7 +253,7 @@ rounding mode for currency (see item 9).
 
 **Symptom.** `(1.005).toFixed(2)` is `'1.00'`, not `'1.01'` — this is
 the well-known IEEE-754 surprise, not banker's rounding. `formatMoney`
-also strips trailing zeros from a number that *is* exact (e.g. `'1,000.10'`
+also strips trailing zeros from a number that _is_ exact (e.g. `'1,000.10'`
 becomes `'1,000.1'`). The task design shows `'1,186.5'` — one decimal
 when needed, none when not — so the trimming rule itself is correct.
 The rounding rule is not.
@@ -260,7 +263,7 @@ a regex for trimming. `toFixed(2)` is imprecise; the regex only does
 display.
 
 **Proposed fix.** Round once via `Decimal.round(2, Decimal.ROUND_HALF_UP)`
-(see item 8). Keep the trailing-zero trim only for the *integer* case
+(see item 8). Keep the trailing-zero trim only for the _integer_ case
 (`'1,000'` not `'1,000.00'`), as the design does.
 
 ---
@@ -272,6 +275,7 @@ calls `setFrom(data.currencies[0])` and `setTo(data.currencies[1])`
 when the rates response arrives. The API list order is
 `EUR, USD, GBP, PLN, SEK, JPY` (verified by probe), but the design
 starts with `USD -> EUR`. Two problems:
+
 - On the first mount, the user's chosen default (`USD -> EUR` per
   design) is silently overwritten with `EUR -> USD`.
 - After the user has loaded a record via OK (item 2), the rates
@@ -288,6 +292,7 @@ React 18 batches the setters into one render — but it still overwrites
 the user's selection.
 
 **Proposed fix.**
+
 - Add an `AbortController`; abort on cleanup.
 - Only call `setFrom`/`setTo` if the user has not yet made a selection
   (e.g. only set them on the first rates response, or only when
@@ -329,7 +334,7 @@ without `encodeURIComponent`.
 
 Note: the live server accepts both encoded and raw — `?user=<raw
 email>` returns 200, `?user=<encoded>` also returns 200. So this is
-a *correctness* issue, not an outage, but it is still a foot-gun for
+a _correctness_ issue, not an outage, but it is still a foot-gun for
 any future code that composes query strings by hand.
 
 ---
@@ -348,11 +353,13 @@ clamp, and the `▼`/`OK` handlers do not clamp against `history.length`.
 
 **Proposed fix.** Clamp `selected` inside the handler, in a single
 reducer-style update, so every transition is bounded:
+
 ```ts
 case '▼':
   setSelected((s) => Math.min(history.length - 1, s + 1));
   break;
 ```
+
 And the same for `▲`. Do not introduce a `useEffect` that clamps on
 history change — that introduces its own setState-in-effect trap.
 
@@ -417,10 +424,12 @@ was only ever validating itself.
 **Root cause.** The mock replaces the function under test.
 
 **Proposed fix.** Either remove the mock and call the real `convert`:
+
 ```ts
 expect(formatMoney(convert(250, '1.084300'))).toBe('271.08')
 ```
-or, better, add tests that *don't* mock `convert` and that exercise
+
+or, better, add tests that _don't_ mock `convert` and that exercise
 `parseFloat` edge cases (`'1,000'`, `'0.001'`, `'1.23'`) and
 `formatMoney` edge cases (rounding, sub-cent, large numbers). Note:
 the second test (`parseAmount('42')`) is also a tautology — it asserts
@@ -460,7 +469,7 @@ user spends the next ten minutes wondering why nothing loads.
 
 **Proposed fix.** Emit a `console.warn` in `vite.config.ts` when
 either variable is missing — only when `mode` is `development` or the
-proxy is being used. Do *not* throw, because that would break
+proxy is being used. Do _not_ throw, because that would break
 `npm run build` and `npm run test:ci` on a clean clone.
 
 ---
@@ -525,6 +534,7 @@ document.
   normally
 
 `/api/rates` shape:
+
 ```json
 {
   "base": "EUR",
@@ -533,24 +543,28 @@ document.
   "updatedAt": "2026-10-03T10:36:10.938Z"
 }
 ```
-Rates are returned as *strings* (with 7+ decimal places) so the
+
+Rates are returned as _strings_ (with 7+ decimal places) so the
 client does not need to re-parse them as floats; a `decimal.js` path
 can consume them directly. The currency list order is fixed at
 `EUR, USD, GBP, PLN, SEK, JPY` (relevant for item 10).
 
 `/api/quote` shape:
+
 ```json
 {
   "quoteId": "uuid",
-  "from": "EUR", "to": "USD",
+  "from": "EUR",
+  "to": "USD",
   "rate": "1.0868620",
   "amount": 1000,
   "createdAt": "2026-10-03T10:38:10.204Z",
   "expiresAt": "2026-10-03T10:38:40.204Z"
 }
 ```
-Note that `amount` is echoed back as a JSON *number* in the response
-(so it has the JS number limitation), but `rate` is a *string*. The
+
+Note that `amount` is echoed back as a JSON _number_ in the response
+(so it has the JS number limitation), but `rate` is a _string_. The
 window between `createdAt` and `expiresAt` is **30 seconds** in every
 probe, but `expiresAt` is informational only — there is no redeem or
 execute endpoint visible, so a fresh quote is required for any new
@@ -561,16 +575,17 @@ caching within the window.
 
 ### 15-sample per case (back-to-back, single client)
 
-| Case | Statuses (count) | Latency all: min / med / max (ms) | Latency 200 only: min / med / max (n=) | Notes |
-|---|---|---|---|---|
-| `EUR->USD 1000` | `200×13, 500×2` | 285 / 1654 / 2692 | 285 / 1356 / 2692 (n=13) | 13% 500s |
-| `amount: 0` | `200×13, 429×1, 500×1` | 244 / 938 / 2697 | 244 / 938 / 2697 (n=13) | **Mostly 200.** Initial probe saw a 500; the 500 is rare but real. |
-| `amount: 0.001` | `200×15` | 703 / 1295 / 2673 | 703 / 1295 / 2673 (n=15) | Initial probe saw a 429; 15-sample is clean. |
-| `amount: 0.01` | `200×15` | 203 / 1431 / 2630 | 203 / 1431 / 2630 (n=15) | Clean. |
-| `EUR->EUR 100` | `200×15` | 228 / 1687 / 2821 | 228 / 1687 / 2821 (n=15) | Clean in this sample. |
-| `amount: 123456789012345` (15 digits) | `200×13, 500×2` | 702 / 1847 / 3044 | 1184 / 1925 / 3044 (n=13) | 13% 500s; server-side. |
+| Case                                  | Statuses (count)       | Latency all: min / med / max (ms) | Latency 200 only: min / med / max (n=) | Notes                                                              |
+| ------------------------------------- | ---------------------- | --------------------------------- | -------------------------------------- | ------------------------------------------------------------------ |
+| `EUR->USD 1000`                       | `200×13, 500×2`        | 285 / 1654 / 2692                 | 285 / 1356 / 2692 (n=13)               | 13% 500s                                                           |
+| `amount: 0`                           | `200×13, 429×1, 500×1` | 244 / 938 / 2697                  | 244 / 938 / 2697 (n=13)                | **Mostly 200.** Initial probe saw a 500; the 500 is rare but real. |
+| `amount: 0.001`                       | `200×15`               | 703 / 1295 / 2673                 | 703 / 1295 / 2673 (n=15)               | Initial probe saw a 429; 15-sample is clean.                       |
+| `amount: 0.01`                        | `200×15`               | 203 / 1431 / 2630                 | 203 / 1431 / 2630 (n=15)               | Clean.                                                             |
+| `EUR->EUR 100`                        | `200×15`               | 228 / 1687 / 2821                 | 228 / 1687 / 2821 (n=15)               | Clean in this sample.                                              |
+| `amount: 123456789012345` (15 digits) | `200×13, 500×2`        | 702 / 1847 / 3044                 | 1184 / 1925 / 3044 (n=13)              | 13% 500s; server-side.                                             |
 
 Observations:
+
 - Latency is high-variance. P50 is roughly 1.3-1.7 s, P90 is well over
   2.5 s. The slowest successful quote in the sample took 3 s.
 - 500s are **non-deterministic** but biased: they happen on `from === to`,
@@ -584,10 +599,10 @@ Observations:
 
 ### Burst vs paced (single client)
 
-| Case | N=15, back-to-back | N=15, 1 s apart |
-|---|---|---|
-| `EUR->USD 1000` | `200×12, 429×2, 500×1`, med 2177 ms | `200×15`, med 1364 ms |
-| `EUR->EUR 100` | `200×14, 500×1`, med 1975 ms | `200×13, 500×2`, med 1382 ms |
+| Case            | N=15, back-to-back                  | N=15, 1 s apart              |
+| --------------- | ----------------------------------- | ---------------------------- |
+| `EUR->USD 1000` | `200×12, 429×2, 500×1`, med 2177 ms | `200×15`, med 1364 ms        |
+| `EUR->EUR 100`  | `200×14, 500×1`, med 1975 ms        | `200×13, 500×2`, med 1382 ms |
 
 **429s correlate with bursts.** `EUR->USD 1000` produced 2×429 + 1×500
 in the burst case and 0 of each in the paced case. The 500s on
@@ -624,7 +639,7 @@ rather than failing closed on burst.
   for testing but the frontend should still URL-encode (item 12).
 - `OPTIONS /api/rates` returns 204 with
   `Access-Control-Allow-Origin: *` and `Allow-Methods: GET, POST,
-  OPTIONS`. CORS is open, which is fine for the proxied path but
+OPTIONS`. CORS is open, which is fine for the proxied path but
   worth knowing if the frontend ever called the API directly.
 - `Cache-Control: no-store` is set on `/api/rates`; no `ETag` or
   `Last-Modified`. The `updatedAt` in the body is the freshness
@@ -636,6 +651,7 @@ Steps and observations from a fresh page load. All three confirm the code-readin
 on listener leaks and stale closures.
 
 ### B1. One tap types two digits
+
 - Steps: press `5` once.
 - Observed: the amount shows `55`.
 - Cause (from code): `StrictMode` runs the listener effect twice in dev, and the first
@@ -643,6 +659,7 @@ on listener leaks and stale closures.
   affected until the first tab switch (not verified, see the note below).
 
 ### B2. `m` saves values from several different moments; result does not match amount
+
 - Steps: select GBP in the first select, press `7`, press `m`, open History.
 - Observed:
   - the amount shows `77` after a single press;
@@ -657,6 +674,7 @@ on listener leaks and stale closures.
   records, each with the state of a different moment.
 
 ### B3. Digits multiply after switching tabs
+
 - Steps: switch Exchange -> History -> Exchange three times, then press `5` once.
 - Observed: the amount shows `55555555` (eight fives).
 - Cause (from code): listeners are never removed. In dev there are 2 listeners from the

@@ -26,14 +26,14 @@ The app has two tabs: **Exchange Rate** and **History**. All input comes from th
 
 ### Keypad
 
-| Key | Exchange Rate | History |
-|---|---|---|
-| `0`–`9`, `00`, `.` | Types the amount | Disabled |
-| ⌫ | Removes the last typed character | Removes the selected record |
-| `C` | Resets the amount to `0` | Removes all records |
-| `m` | Saves the current conversion to the history | Disabled |
-| ▲ / ▼ | — | Moves the selection up / down |
-| 🆗 | — | Loads the currencies and amount of the selected record and switches to Exchange Rate |
+| Key                | Exchange Rate                               | History                                                                              |
+| ------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `0`–`9`, `00`, `.` | Types the amount                            | Disabled                                                                             |
+| ⌫                  | Removes the last typed character            | Removes the selected record                                                          |
+| `C`                | Resets the amount to `0`                    | Removes all records                                                                  |
+| `m`                | Saves the current conversion to the history | Disabled                                                                             |
+| ▲ / ▼              | —                                           | Moves the selection up / down                                                        |
+| 🆗                 | —                                           | Loads the currencies and amount of the selected record and switches to Exchange Rate |
 
 ## 😤 User complaints
 
@@ -53,18 +53,18 @@ The app has two tabs: **Exchange Rate** and **History**. All input comes from th
 
 Whatever markup you end up with, please keep these `data-testid` attributes on the matching elements. The current code already has them.
 
-| `data-testid` | Element |
-|---|---|
-| `tab-exchange`, `tab-history` | Tab buttons |
-| `from-currency`, `to-currency` | Currency selects (keep them native `<select>` elements) |
-| `amount` | Typed amount |
-| `result` | Converted amount |
-| `updated-at` | When the quote was last updated |
-| `refresh` | Reload button |
-| `key-0` … `key-9`, `key-00`, `key-dot` | Digit keys |
-| `key-backspace`, `key-clear`, `key-save`, `key-up`, `key-down`, `key-ok` | `⌫`, `C`, `m`, `▲`, `▼`, 🆗 |
-| `history-item` | Each history record, with `aria-selected="true"` on the selected one |
-| `history-count` | Number of records |
+| `data-testid`                                                            | Element                                                              |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `tab-exchange`, `tab-history`                                            | Tab buttons                                                          |
+| `from-currency`, `to-currency`                                           | Currency selects (keep them native `<select>` elements)              |
+| `amount`                                                                 | Typed amount                                                         |
+| `result`                                                                 | Converted amount                                                     |
+| `updated-at`                                                             | When the quote was last updated                                      |
+| `refresh`                                                                | Reload button                                                        |
+| `key-0` … `key-9`, `key-00`, `key-dot`                                   | Digit keys                                                           |
+| `key-backspace`, `key-clear`, `key-save`, `key-up`, `key-down`, `key-ok` | `⌫`, `C`, `m`, `▲`, `▼`, 🆗                                          |
+| `history-item`                                                           | Each history record, with `aria-selected="true"` on the selected one |
+| `history-count`                                                          | Number of records                                                    |
 
 ## 📦 What we expect back
 

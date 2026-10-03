@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import Keypad from './Keypad'
-import { initialHistory, type HistoryRecord } from './history'
-import { convert, formatMoney, parseAmount } from './money'
+import Keypad from '@/widgets/keypad'
+import { initialHistory, type HistoryRecord } from '@/entities/history-record'
+import { convert, formatMoney, parseAmount } from '@/shared/lib/money'
 
 type Tab = 'exchange' | 'history'
 
@@ -181,7 +181,11 @@ export default function App() {
       {tab === 'exchange' && (
         <div>
           <div>
-            <select data-testid="from-currency" value={from} onChange={(e) => setFrom(e.target.value)}>
+            <select
+              data-testid="from-currency"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            >
               {currencies.map((c) => (
                 <option key={c} value={c}>
                   {c}
