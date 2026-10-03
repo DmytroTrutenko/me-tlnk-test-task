@@ -16,6 +16,7 @@ export default function App() {
     history,
     selected,
     canSave,
+    isInitialLoad,
     setTab,
     setFrom,
     setTo,
@@ -45,6 +46,7 @@ export default function App() {
       selected={selected}
       onKey={applyKey}
       canSave={canSave}
+      isInitialLoad={isInitialLoad}
     />
   )
 }

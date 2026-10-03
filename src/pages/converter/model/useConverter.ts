@@ -115,6 +115,7 @@ export interface UseConverterResult {
   updatedAt: string | null
   ageLabel: string
   canSave: boolean
+  isInitialLoad: boolean
   applyKey: (id: KeyId) => void
   setTab: (tab: TabId) => void
   setFrom: (from: string) => void
@@ -158,6 +159,7 @@ export function useConverter(): UseConverterResult {
 
   const [lastSuccessAt, setLastSuccessAt] = useState<Date | null>(null)
   const lastQuoteIdRef = useRef<string | null>(null)
+  const firstQuoteSettledRef = useRef(false)
 
   useEffect(() => {
     if (quote && quote.quoteId !== lastQuoteIdRef.current) {
@@ -165,6 +167,12 @@ export function useConverter(): UseConverterResult {
       setLastSuccessAt(new Date(quote.createdAt))
     }
   }, [quote])
+
+  useEffect(() => {
+    if (!firstQuoteSettledRef.current && (quote !== null || quoteError !== null)) {
+      firstQuoteSettledRef.current = true
+    }
+  }, [quote, quoteError])
 
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
@@ -252,6 +260,10 @@ export function useConverter(): UseConverterResult {
 
   const ageLabel = buildResultLabel(now, lastSuccessAt, quoteLoading)
 
+  const isInitialLoad =
+    (currenciesLoading && currencies.length === 0) ||
+    (currencies.length > 0 && !currenciesError && !firstQuoteSettledRef.current)
+
   return {
     tab,
     amount,
@@ -272,6 +284,7 @@ export function useConverter(): UseConverterResult {
     updatedAt: lastSuccessAt ? lastSuccessAt.toISOString() : null,
     ageLabel,
     canSave,
+    isInitialLoad,
     applyKey,
     setTab,
     setFrom,

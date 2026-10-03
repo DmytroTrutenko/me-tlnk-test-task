@@ -66,7 +66,15 @@ export default function ExchangeScreen({
           ))}
         </select>
         <span className={styles.chevron} aria-hidden="true">
-          ›
+          <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+            <path
+              d="M1.5 1L8 7L1.5 13"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </span>
         <span data-testid="amount" className={styles.amount}>
           {amount}
@@ -88,7 +96,15 @@ export default function ExchangeScreen({
           ))}
         </select>
         <span className={styles.chevron} aria-hidden="true">
-          ›
+          <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+            <path
+              d="M1.5 1L8 7L1.5 13"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </span>
         <span data-testid="result" className={styles.result}>
           <ResultText state={resultState} value={result} />
@@ -103,7 +119,7 @@ export default function ExchangeScreen({
 
       <div className={styles.footer}>
         <span data-testid="updated-at" className={styles.updated}>
-          {resultState === 'loading' ? 'Updating…' : ageLabel}
+          {resultState === 'loading' ? 'Updating…' : 'Last updated ' + ageLabel}
         </span>
         <button
           type="button"
@@ -113,8 +129,8 @@ export default function ExchangeScreen({
           aria-label="Refresh quote"
         >
           <svg
-            width="14"
-            height="14"
+            width="12"
+            height="12"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"

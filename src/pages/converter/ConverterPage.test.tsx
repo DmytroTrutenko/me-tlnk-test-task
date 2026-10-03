@@ -597,6 +597,45 @@ describe('ConverterPage integration', () => {
     })
   })
 
+  describe('11b. Skeleton covers the calculator while the initial rates+quote are in flight', () => {
+    it('renders the skeleton until the first quote settles, then hides it', async () => {
+      const { fetch } = await bootstrap(['USD', 'EUR'])
+
+      // The rates call has settled, but the first quote is still pending.
+      await waitForPending(fetch, 1)
+      expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument()
+      // The real data-testid elements are still in the DOM under the overlay.
+      expect(screen.getByTestId('from-currency')).toBeInTheDocument()
+      expect(screen.getByTestId('to-currency')).toBeInTheDocument()
+      expect(screen.getByTestId('amount')).toBeInTheDocument()
+      expect(screen.getByTestId('result')).toBeInTheDocument()
+
+      const req = await waitForPending(fetch, 1)
+      const body = req.body as { from: string; to: string; amount: number }
+      fetch.resolveByIndex(
+        0,
+        buildQuoteResponse({ from: body.from, to: body.to, rate: '0.9', amount: body.amount }),
+      )
+      await flushMicrotasks()
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('loading-skeleton')).not.toBeInTheDocument()
+      })
+    })
+
+    it('does not show the skeleton on a manual refresh after the first load', async () => {
+      const { fetch, user } = await bootstrap()
+      await clearAllPending(fetch)
+
+      expect(screen.queryByTestId('loading-skeleton')).not.toBeInTheDocument()
+
+      await user.click(screen.getByTestId('refresh'))
+      await flushMicrotasks()
+
+      expect(screen.queryByTestId('loading-skeleton')).not.toBeInTheDocument()
+    })
+  })
+
   describe('12. Smoke: every data-testid from the README is present', () => {
     it('Exchange tab has all required test ids', async () => {
       await bootstrap()

@@ -2,9 +2,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  padding: 22px 0 18px;
-  font-size: 15px;
+  gap: 11px;
+  padding: 24px 0 18px;
+  font-size: 17px;
 }
 
 .tab {
@@ -13,6 +13,8 @@
   padding: 6px 4px;
   color: var(--color-text);
   font-weight: 500;
+  font-size: 17px;
+  line-height: 20px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: color 120ms ease;
@@ -25,6 +27,6 @@
 
 .divider {
   width: 1px;
-  height: 18px;
-  background: var(--color-border);
+  height: 24px;
+  background: var(--color-text);
 }

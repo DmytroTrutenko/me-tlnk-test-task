@@ -10,12 +10,13 @@
 .list {
   list-style: none;
   margin: 0;
-  padding: 0 24px 0 28px;
-  height: 132px;
+  padding: 0 31px 0 31px;
+  height: 100%;
   overflow-y: auto;
   scrollbar-color: var(--color-scroll) transparent;
   scrollbar-width: thin;
   width: 100%;
+  color: var(--color-text);
 
   &::-webkit-scrollbar {
     width: 4px;
@@ -30,8 +31,8 @@
 }
 
 .item {
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: 20px;
+  line-height: 22px;
   color: var(--color-text);
   font-weight: 400;
   white-space: nowrap;
@@ -44,6 +45,7 @@
 
 .count {
   margin: 8px 0 0;
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 14px;
   color: var(--color-text-muted);
 }

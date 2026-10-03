@@ -82,12 +82,13 @@ Please don't spend more than 8 hours. We are interested in how you prioritise, n
 npm install
 npm run dev
 ```
+
 ## How to run
 
 Requires Node.js 18+.
 
 ```bash
-cp .env.example .env 
+cp .env.example .env
 # set CANDIDATE_ID in .env
 npm install
 npm run dev

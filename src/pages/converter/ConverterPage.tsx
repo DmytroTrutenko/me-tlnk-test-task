@@ -4,6 +4,7 @@ import Tabs from '@/widgets/tabs'
 import ExchangeScreen from '@/widgets/exchange-screen'
 import HistoryScreen from '@/widgets/history-screen'
 import Keypad from '@/widgets/keypad'
+import Skeleton from './Skeleton'
 import styles from './ConverterPage.module.scss'
 
 interface ConverterPageProps {
@@ -26,6 +27,7 @@ interface ConverterPageProps {
   selected: number
   onKey: (id: KeyId) => void
   canSave: boolean
+  isInitialLoad: boolean
 }
 
 export default function ConverterPage({
@@ -48,6 +50,7 @@ export default function ConverterPage({
   selected,
   onKey,
   canSave,
+  isInitialLoad,
 }: ConverterPageProps) {
   const historyEmpty = history.length === 0
   return (
@@ -83,6 +86,7 @@ export default function ConverterPage({
           onKey={onKey}
         />
         <div className={styles.homeIndicator} aria-hidden="true" />
+        {isInitialLoad ? <Skeleton /> : null}
       </div>
     </div>
   )
