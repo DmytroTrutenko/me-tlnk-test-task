@@ -629,3 +629,36 @@ rather than failing closed on burst.
 - `Cache-Control: no-store` is set on `/api/rates`; no `ETag` or
   `Last-Modified`. The `updatedAt` in the body is the freshness
   signal.
+
+## Browser verification (manual, `npm run dev`, StrictMode on)
+
+Steps and observations from a fresh page load. All three confirm the code-reading findings
+on listener leaks and stale closures.
+
+### B1. One tap types two digits
+- Steps: press `5` once.
+- Observed: the amount shows `55`.
+- Cause (from code): `StrictMode` runs the listener effect twice in dev, and the first
+  listener is never removed, so every click is handled twice. A production build is not
+  affected until the first tab switch (not verified, see the note below).
+
+### B2. `m` saves values from several different moments; result does not match amount
+- Steps: select GBP in the first select, press `7`, press `m`, open History.
+- Observed:
+  - the amount shows `77` after a single press;
+  - while the quote is loading the result briefly shows an unformatted float, then settles on `9`;
+    for 77 GBP the expected result is around 100, so `9` looks like the result of a different
+    amount (cause not established, re-check after the fix);
+  - one press of `m` added three records: `EUR 0 → USD 0`, `EUR 0 → USD 0`, `GBP 77 → USD 9`.
+- Cause (from code): the keypad effect depends on `[tab]` only, so each handler keeps the
+  `from`, `to`, `amount`, `result` it saw when it was created. Handlers created at mount
+  (two of them in StrictMode) still hold the initial state `EUR / USD / 0`; a handler created
+  later holds newer values. Every handler fires on one click, so one press saves several
+  records, each with the state of a different moment.
+
+### B3. Digits multiply after switching tabs
+- Steps: switch Exchange -> History -> Exchange three times, then press `5` once.
+- Observed: the amount shows `55555555` (eight fives).
+- Cause (from code): listeners are never removed. In dev there are 2 listeners from the
+  StrictMode mount plus one per tab change: 2 + 6 = 8, which matches exactly if each of the
+  three round trips counts as two switches.
