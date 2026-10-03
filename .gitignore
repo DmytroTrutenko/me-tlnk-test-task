@@ -24,3 +24,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets and local agent config
+.env.*
+!.env.example
+.mcp.json
+.claude/settings.local.json
