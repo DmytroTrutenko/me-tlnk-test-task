@@ -82,3 +82,31 @@ Please don't spend more than 8 hours. We are interested in how you prioritise, n
 npm install
 npm run dev
 ```
+## How to run
+
+Requires Node.js 18+.
+
+```bash
+cp .env.example .env 
+# set CANDIDATE_ID in .env
+npm install
+npm run dev
+```
+
+| Command                | What it does                                            |
+| ---------------------- | ------------------------------------------------------- |
+| `npm run dev`          | Dev server with the `/api` proxy                        |
+| `npm run build`        | Type-check and production build                         |
+| `npm run preview`      | Serve the production build                              |
+| `npm test`             | Tests in watch mode                                     |
+| `npm run test:ci`      | Whole suite once, exits non-zero on failure             |
+| `npm run lint`         | ESLint                                                  |
+| `npm run format:check` | Prettier check (`npm run format` writes the formatting) |
+
+## Project structure
+
+Lightweight Feature-Sliced Design under `src/`: `app` → `pages` → `widgets` → `entities` → `shared` (imports only go downward, each slice is imported through its `index.ts`, alias `@` → `src`). Tests live next to the code.
+
+## Notes
+
+All problems found, their root causes, fixes and design decisions are in [FINDINGS.md](./FINDINGS.md).
