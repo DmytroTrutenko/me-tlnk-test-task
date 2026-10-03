@@ -5,19 +5,21 @@ interface ExchangeScreenProps {
   to: string
   amount: string
   result: string
+  resultState: 'loading' | 'error' | 'ready'
   currencies: string[]
-  loading: boolean
-  updatedAt: string | null
+  currenciesLoading: boolean
+  currenciesError: string | null
+  onRetryCurrencies: () => void
+  ageLabel: string
   onFromChange: (value: string) => void
   onToChange: (value: string) => void
   onRefresh: () => void
 }
 
-function formatUpdatedAt(iso: string | null): string {
-  if (!iso) return '—'
-  const time = iso.split('T')[1]
-  if (!time) return '—'
-  return time.slice(0, 8)
+function ResultText({ state, value }: { state: 'loading' | 'error' | 'ready'; value: string }) {
+  if (state === 'loading') return <>…</>
+  if (state === 'error') return <>—</>
+  return <>{value}</>
 }
 
 export default function ExchangeScreen({
@@ -25,23 +27,39 @@ export default function ExchangeScreen({
   to,
   amount,
   result,
+  resultState,
   currencies,
-  loading,
-  updatedAt,
+  currenciesLoading,
+  currenciesError,
+  onRetryCurrencies,
+  ageLabel,
   onFromChange,
   onToChange,
   onRefresh,
 }: ExchangeScreenProps) {
+  const selectOptions = from && !currencies.includes(from) ? [from, ...currencies] : currencies
+  const toOptions = to && !currencies.includes(to) ? [to, ...currencies] : currencies
+
   return (
     <div className={styles.screen}>
+      {currenciesError ? (
+        <div className={styles.currencyError} role="alert">
+          <span>{currenciesError}</span>
+          <button type="button" className={styles.currencyRetry} onClick={onRetryCurrencies}>
+            Retry
+          </button>
+        </div>
+      ) : null}
+
       <div className={styles.row}>
         <select
           data-testid="from-currency"
           value={from}
           onChange={(e) => onFromChange(e.target.value)}
           className={styles.currency}
+          disabled={currenciesLoading && currencies.length === 0}
         >
-          {currencies.map((c) => (
+          {selectOptions.map((c) => (
             <option key={c} value={c}>
               {c}
             </option>
@@ -61,8 +79,9 @@ export default function ExchangeScreen({
           value={to}
           onChange={(e) => onToChange(e.target.value)}
           className={styles.currency}
+          disabled={currenciesLoading && currencies.length === 0}
         >
-          {currencies.map((c) => (
+          {toOptions.map((c) => (
             <option key={c} value={c}>
               {c}
             </option>
@@ -72,18 +91,20 @@ export default function ExchangeScreen({
           ›
         </span>
         <span data-testid="result" className={styles.result}>
-          {result}
+          <ResultText state={resultState} value={result} />
         </span>
       </div>
 
+      {resultState === 'error' ? (
+        <p className={styles.error} role="status">
+          Couldn't fetch a quote. Try again.
+        </p>
+      ) : null}
+
       <div className={styles.footer}>
-        {loading ? (
-          <span className={styles.updated}>Loading…</span>
-        ) : (
-          <span data-testid="updated-at" className={styles.updated}>
-            Last updated {formatUpdatedAt(updatedAt)}
-          </span>
-        )}
+        <span data-testid="updated-at" className={styles.updated}>
+          {resultState === 'loading' ? 'Updating…' : ageLabel}
+        </span>
         <button
           type="button"
           data-testid="refresh"

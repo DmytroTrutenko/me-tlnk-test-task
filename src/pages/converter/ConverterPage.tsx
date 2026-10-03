@@ -13,15 +13,19 @@ interface ConverterPageProps {
   to: string
   amount: string
   result: string
+  resultState: 'loading' | 'error' | 'ready'
   currencies: string[]
-  loading: boolean
-  updatedAt: string | null
+  currenciesLoading: boolean
+  currenciesError: string | null
+  onRetryCurrencies: () => void
+  ageLabel: string
   onFromChange: (value: string) => void
   onToChange: (value: string) => void
   onRefresh: () => void
   history: HistoryRecord[]
   selected: number
   onKey: (id: KeyId) => void
+  canSave: boolean
 }
 
 export default function ConverterPage({
@@ -31,16 +35,21 @@ export default function ConverterPage({
   to,
   amount,
   result,
+  resultState,
   currencies,
-  loading,
-  updatedAt,
+  currenciesLoading,
+  currenciesError,
+  onRetryCurrencies,
+  ageLabel,
   onFromChange,
   onToChange,
   onRefresh,
   history,
   selected,
   onKey,
+  canSave,
 }: ConverterPageProps) {
+  const historyEmpty = history.length === 0
   return (
     <div className={styles.shell}>
       <div className={styles.phone}>
@@ -52,9 +61,12 @@ export default function ConverterPage({
               to={to}
               amount={amount}
               result={result}
+              resultState={resultState}
               currencies={currencies}
-              loading={loading}
-              updatedAt={updatedAt}
+              currenciesLoading={currenciesLoading}
+              currenciesError={currenciesError}
+              onRetryCurrencies={onRetryCurrencies}
+              ageLabel={ageLabel}
               onFromChange={onFromChange}
               onToChange={onToChange}
               onRefresh={onRefresh}
@@ -63,7 +75,13 @@ export default function ConverterPage({
             <HistoryScreen history={history} selected={selected} />
           )}
         </div>
-        <Keypad tab={tab} onKey={onKey} />
+        <Keypad
+          tab={tab}
+          historyEmpty={historyEmpty}
+          canSave={canSave}
+          amount={amount}
+          onKey={onKey}
+        />
         <div className={styles.homeIndicator} aria-hidden="true" />
       </div>
     </div>

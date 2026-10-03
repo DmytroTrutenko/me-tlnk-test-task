@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { DISABLED_ON_HISTORY, type KeyId, type TabId } from '@/shared/lib/constants'
+import { isZero } from '@/shared/lib/money'
 import styles from './Keypad.module.scss'
 
 type KeyVariant = 'digit' | 'danger' | 'save' | 'backspace' | 'arrow' | 'ok'
@@ -35,7 +36,7 @@ const ROWS: KeyConfig[][] = [
     { id: '1', label: '1', testId: 'key-1', variant: 'digit' },
     { id: '2', label: '2', testId: 'key-2', variant: 'digit' },
     { id: '3', label: '3', testId: 'key-3', variant: 'digit' },
-    { id: 'ok', label: 'OK', testId: 'key-ok', variant: 'ok', historyOnly: true },
+    { id: 'ok', label: '🆗', testId: 'key-ok', variant: 'ok', historyOnly: true },
   ],
   [
     { id: '00', label: '00', testId: 'key-00', variant: 'digit' },
@@ -65,19 +66,40 @@ function BackspaceIcon() {
 
 interface KeypadProps {
   tab: TabId
+  historyEmpty: boolean
+  canSave: boolean
+  amount: string
   onKey: (id: KeyId) => void
 }
 
-export default function Keypad({ tab, onKey }: KeypadProps) {
+export default function Keypad({ tab, historyEmpty, canSave, amount, onKey }: KeypadProps) {
+  const isHistory = tab === 'history'
+  const zeroAmount = isZero(amount)
+
+  const computeDisabled = (id: KeyId): boolean => {
+    if (isHistory) {
+      if (DISABLED_ON_HISTORY.has(id)) return true
+      if (
+        historyEmpty &&
+        (id === 'up' || id === 'down' || id === 'ok' || id === 'backspace' || id === 'clear')
+      ) {
+        return true
+      }
+      return false
+    }
+    if (id === 'save') return !canSave || zeroAmount
+    return false
+  }
+
   return (
     <div className={styles.keypad} role="group" aria-label="Keypad">
       {ROWS.map((row, rowIndex) => (
         <div key={rowIndex} className={styles.row}>
           {row.map((key) => {
-            if (key.historyOnly && tab !== 'history') {
+            if (key.historyOnly && !isHistory) {
               return <span key={key.id} className={styles.placeholder} aria-hidden="true" />
             }
-            const disabled = tab === 'history' && DISABLED_ON_HISTORY.has(key.id)
+            const disabled = computeDisabled(key.id)
             return (
               <button
                 key={key.id}
@@ -86,6 +108,7 @@ export default function Keypad({ tab, onKey }: KeypadProps) {
                 disabled={disabled}
                 onClick={() => onKey(key.id)}
                 className={`${styles.key} ${styles[key.variant]}`}
+                aria-label={key.variant === 'backspace' ? 'Backspace' : undefined}
               >
                 {key.variant === 'backspace' ? <BackspaceIcon /> : key.label}
               </button>

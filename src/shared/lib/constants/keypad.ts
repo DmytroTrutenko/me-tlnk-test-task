@@ -18,7 +18,9 @@ export type KeyId =
   | 'down'
   | 'ok'
 
-export const DIGIT_KEYS: Partial<Record<KeyId, string>> = {
+export type DigitKeyId = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '00' | 'dot'
+
+export const DIGIT_KEYS: Record<DigitKeyId, string> = {
   '0': '0',
   '1': '1',
   '2': '2',
@@ -49,6 +51,6 @@ export const DISABLED_ON_HISTORY: ReadonlySet<KeyId> = new Set<KeyId>([
   'save',
 ])
 
-export function isDigitKey(id: KeyId): id is keyof typeof DIGIT_KEYS {
+export function isDigitKey(id: KeyId): id is DigitKeyId {
   return id in DIGIT_KEYS
 }

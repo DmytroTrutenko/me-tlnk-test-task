@@ -42,7 +42,7 @@ export interface HistoryState {
 export const initialState: HistoryState = { items: initialHistory, selected: 0 }
 
 export type HistoryAction =
-  | { type: 'save'; record: HistoryRecordInput }
+  | { type: 'save'; record: HistoryRecord }
   | { type: 'removeSelected' }
   | { type: 'clear' }
   | { type: 'move'; direction: 'up' | 'down' }
@@ -76,9 +76,8 @@ export function historyReducer(state: HistoryState, action: HistoryAction): Hist
       }
     }
     case 'save': {
-      const record = createHistoryRecord(action.record)
       return {
-        items: [...state.items, record],
+        items: [...state.items, action.record],
         selected: state.items.length,
       }
     }

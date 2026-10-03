@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  createHistoryRecord,
   historyReducer,
   initialHistory,
   initialState,
@@ -9,16 +10,19 @@ import {
 
 const sample = (
   overrides: Partial<{ from: string; to: string; amount: string; result: string }> = {},
-) => ({
-  from: 'USD',
-  to: 'EUR',
-  amount: '100',
-  result: '92.25',
-  ...overrides,
-})
+) =>
+  createHistoryRecord({
+    from: 'USD',
+    to: 'EUR',
+    amount: '100',
+    result: '92.25',
+    ...overrides,
+  })
 
-const save = (state: HistoryState, overrides: Parameters<typeof sample>[0] = {}) =>
-  historyReducer(state, { type: 'save', record: sample(overrides) } as HistoryAction)
+const save = (state: HistoryState, overrides: Parameters<typeof sample>[0] = {}) => {
+  const record = sample(overrides)
+  return historyReducer(state, { type: 'save', record } as HistoryAction)
+}
 
 describe('initial state', () => {
   it('starts with the seed history', () => {
@@ -70,13 +74,13 @@ describe('save', () => {
     expect(next.selected).toBe(0)
   })
 
-  it('assigns an id greater than every seed id', () => {
-    const next = save(initialState)
-    const maxSeedId = Math.max(...initialState.items.map((r) => r.id))
-    expect(next.items[next.items.length - 1].id).toBeGreaterThan(maxSeedId)
+  it('stores the record exactly as given (no id reassignment)', () => {
+    const record = sample({ from: 'AAA', to: 'BBB', amount: '1', result: '2' })
+    const next = historyReducer(initialState, { type: 'save', record })
+    expect(next.items[next.items.length - 1]).toBe(record)
   })
 
-  it('produces increasing ids for consecutive saves', () => {
+  it('uses the ids from createHistoryRecord, so they increase with each save', () => {
     const first = save(initialState)
     const second = save(first)
     const firstId = first.items[first.items.length - 1].id
