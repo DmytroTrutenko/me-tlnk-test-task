@@ -26,7 +26,7 @@ function mockFetchDeferred() {
       }),
   )
   globalThis.fetch = fetchMock as unknown as typeof fetch
-  return { fetchMock, resolve: resolveFetch }
+  return { fetchMock, resolve: (value: Response) => resolveFetch(value) }
 }
 
 describe('useQuote', () => {
