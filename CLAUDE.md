@@ -1,6 +1,6 @@
 # Currency Exchange
 
-React 18 + Vite 5 + TypeScript 5.6 app. The spec is in README.md (keypad table, data-testid table). The visual source of truth is the Figma screenshot provided in the prompt; the Figma link cannot be opened.
+React 18 + Vite 5 + TypeScript 5.6 app. The user-facing behaviour is described in README.md.
 
 ## Commands
 
@@ -15,7 +15,7 @@ After every task run lint, format:check, build and test:ci, and fix everything y
 - Keep every `data-testid` from the README table. Currency selects stay native `<select>` elements.
 - Dependency versions are pinned (no `^`). Install with `npm i -E` / `npm i -D -E`.
 - tsconfig `lib` is ES2020: no `replaceAll`, `Array.prototype.at`, `Object.hasOwn`. `noUnusedLocals` and `noUnusedParameters` are on, and `tsc -b` also type-checks tests (`include: ["src"]`).
-- Never edit or commit `.env`, never edit `.env.example`, never write the CANDIDATE_ID value into any file or output.
+- Never edit or commit `.env`, never edit `.env.example`, never write the API user id into any file or output.
 - No localStorage: history is in memory only.
 - Do not run `git commit`, `git push`, or change git remotes. The human commits.
 - Money is never handled as a JS number: amounts are strings, math goes through decimal.js. History stores raw values ('1000'), formatting happens only at render time.

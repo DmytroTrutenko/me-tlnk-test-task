@@ -6,11 +6,11 @@ import { fileURLToPath, URL } from 'node:url'
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const apiUrl = env.API_URL ?? ''
-  const candidateId = env.CANDIDATE_ID ?? ''
+  const apiUser = env.API_USER ?? env.CANDIDATE_ID ?? ''
 
-  if (command === 'serve' && (!apiUrl || !candidateId)) {
+  if (command === 'serve' && (!apiUrl || !apiUser)) {
     console.warn(
-      '[vite.config] API_URL or CANDIDATE_ID is empty. The /api proxy will not work correctly.',
+      '[vite.config] API_URL or API_USER is empty. The /api proxy will not work correctly.',
     )
   }
 
@@ -21,7 +21,7 @@ export default defineConfig(({ command, mode }) => {
       secure: true,
       rewrite: (path) => {
         const [base, query] = path.split('?')
-        const userParam = `user=${encodeURIComponent(candidateId)}`
+        const userParam = `user=${encodeURIComponent(apiUser)}`
         return query ? `${base}?${query}&${userParam}` : `${base}?${userParam}`
       },
     },
