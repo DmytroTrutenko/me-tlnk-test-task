@@ -69,7 +69,7 @@ selects match, a fresh quote does not change the amount string.
   uses `decimal.js` with `ROUND_HALF_UP`.
 - **Rates response overwrote the user's selection.** The rates effect set
   `from = data.currencies[0]` and `to = data.currencies[1]`, flipping the
-  design's `USD → EUR` default to `EUR → USD` and resetting the user's
+  intended `USD → EUR` default to `EUR → USD` and resetting the user's
   choice on any re-fetch. Fix: the current `from`/`to` is kept if it is in
   the loaded list, otherwise the defaults `USD`/`EUR` are applied; the API
   only fills the `<option>` elements.
@@ -105,7 +105,7 @@ selects match, a fresh quote does not change the amount string.
   `Keypad.tsx`. Fix: SCSS modules, states via `aria-selected` and
   `:disabled`.
 - Proxy `user=` param was not URL-encoded; a `+` in the email decodes as a
-  space. Fix: `encodeURIComponent(candidateId)` in the rewrite.
+  space. Fix: `encodeURIComponent(apiUser)` in the rewrite.
 - No guard for a missing `.env`: not fixed. A throw would break `build`
   and `test:ci` on a clean clone; the README says to copy `.env.example`.
 
@@ -124,20 +124,20 @@ selects match, a fresh quote does not change the amount string.
 
 ## 5. Decisions
 
-- **Backspace on History is active when the history is not empty** (spec
-  over design, which dims it). **`m` stays in the DOM on History as
-  `disabled` and visually hidden** (the design shows no `m` there); `m`
+- **Backspace on History is active when the history is not empty** (it is
+  only dimmed while the list is empty). **`m` stays in the DOM on History as
+  `disabled` and visually hidden** (the layout shows no `m` there); `m`
   appends and selects the new record on Exchange.
 - **Seed and saved records store raw values** (`'1000'`, `'12500'`);
   amounts display as typed, only results are grouped. `formatMoney(0)` is
-  `0`, as in the design.
+  `0`.
 - **Zero amount and `from === to` go through the API like any other
   request**; the 500s are random and not tied to these inputs. The result
   for zero is 0.
 - **`Number()` only at the API boundary**: amounts up to 15 digits are
   exact in a double, hence the 15-digit input limit. All other math is
   `decimal.js`. The result is rounded to 2 decimals with trailing zeros
-  trimmed (`1,186.5`), as in the design.
+  trimmed (`1,186.5`).
 - **Debounce 300 ms on amount only**, because 429s correlate with bursts.
   No automatic retries: errors are visible and the refresh button is the
   retry.
